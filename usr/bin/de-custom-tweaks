@@ -2,6 +2,7 @@
 
 # Function to modify the session for the community user (GNOME)
 modify_gnome_session() {
+    sleep 1
     if [ -f /var/lib/AccountsService/users/community ]; then
         sed -i 's/XSession=gnome/XSession=livecdWayland/' /var/lib/AccountsService/users/community
         echo "Modified XSession for community user to livecdWayland"

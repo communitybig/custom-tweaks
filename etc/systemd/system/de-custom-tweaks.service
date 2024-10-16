@@ -1,12 +1,13 @@
 [Unit]
 Description=Custom Tweaks for Desktop Environments
 Before=display-manager.service
-After=local-fs.target
+After=local-fs.target accounts-daemon.service
 
 [Service]
 Type=oneshot
 ExecStart=/usr/bin/de-custom-tweaks
 RemainAfterExit=yes
+Environment=XDG_CURRENT_DESKTOP=GNOME
 
 [Install]
 WantedBy=multi-user.target
