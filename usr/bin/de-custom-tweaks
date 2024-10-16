@@ -1,0 +1,41 @@
+#!/bin/bash
+
+# Function to modify the session for the community user (GNOME)
+modify_gnome_session() {
+    if [ -f /var/lib/AccountsService/users/community ]; then
+        sed -i 's/XSession=gnome/XSession=livecdWayland/' /var/lib/AccountsService/users/community
+        echo "Modified XSession for community user to livecdWayland"
+    else
+        echo "Community user file not found"
+    fi
+}
+
+# Function for possible KDE tweaks
+kde_tweaks() {
+    # Add specific tweaks for KDE here
+    echo "Applying KDE tweaks"
+}
+
+# Function for possible XFCE tweaks
+xfce_tweaks() {
+    # Add specific tweaks for XFCE here
+    echo "Applying XFCE tweaks"
+}
+
+# Detects the current desktop environment and applies the appropriate tweaks
+detect_and_apply_tweaks() {
+    if [ "$XDG_CURRENT_DESKTOP" = "GNOME" ]; then
+        modify_gnome_session
+    elif [ "$XDG_CURRENT_DESKTOP" = "KDE" ]; then
+        kde_tweaks
+    elif [ "$XDG_CURRENT_DESKTOP" = "XFCE" ]; then
+        xfce_tweaks
+    else
+        echo "Desktop environment not recognized or not supported"
+    fi
+}
+
+# Run the main function
+detect_and_apply_tweaks
+
+exit 0
