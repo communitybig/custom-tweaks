@@ -1,42 +1,77 @@
 #!/bin/bash
 
-# Function to modify the session for the community user (GNOME)
+# File path for the community user's AccountsService configuration
+communityFile="/var/lib/AccountsService/users/community"
+# The desired session type to be set
+desiredSession="livecdWayland"
+
+# Function to modify GNOME session for the community user
 modify_gnome_session() {
-    sleep 1
-    if [ -f /var/lib/AccountsService/users/community ]; then
-        sed -i 's/XSession=gnome/XSession=livecdWayland/' /var/lib/AccountsService/users/community
-        echo "Modified XSession for community user to livecdWayland"
-    else
-        echo "Community user file not found"
-    fi
+    local maxAttempts=10
+    local attempt=0
+
+    # Try to modify the file, with a maximum number of attempts
+    while [ $attempt -lt $maxAttempts ]; do
+        if [ -f "$communityFile" ]; then
+            # Check if XSession is already defined in the file
+            if grep -q "XSession=" "$communityFile"; then
+                # Replace existing XSession value
+                sed -i "s/XSession=.*/XSession=$desiredSession/" "$communityFile"
+                echo "Modified XSession for community user to $desiredSession"
+            else
+                # Add XSession if it doesn't exist
+                echo "XSession=$desiredSession" >> "$communityFile"
+                echo "Added XSession=$desiredSession to community user file"
+            fi
+            # Display the content of the file for verification
+            cat "$communityFile"
+            return 0
+        else
+            # File not found, wait and retry
+            echo "Waiting for $communityFile to be available (attempt $((attempt+1))/$maxAttempts)"
+            sleep 1
+            attempt=$((attempt+1))
+        fi
+    done
+
+    # If the file is not found after all attempts, report an error
+    echo "Error: $communityFile not found after $maxAttempts attempts"
+    return 1
 }
 
-# Function for possible KDE tweaks
+# Function for KDE-specific tweaks
 kde_tweaks() {
-    # Add specific tweaks for KDE here
     echo "Applying KDE tweaks"
+    # Add KDE-specific tweaks here
 }
 
-# Function for possible XFCE tweaks
+# Function for XFCE-specific tweaks
 xfce_tweaks() {
-    # Add specific tweaks for XFCE here
     echo "Applying XFCE tweaks"
+    # Add XFCE-specific tweaks here
 }
 
-# Detects the current desktop environment and applies the appropriate tweaks
+# Function to detect the current desktop environment and apply appropriate tweaks
 detect_and_apply_tweaks() {
-    if [ "$XDG_CURRENT_DESKTOP" = "GNOME" ]; then
-        modify_gnome_session
-    elif [ "$XDG_CURRENT_DESKTOP" = "KDE" ]; then
-        kde_tweaks
-    elif [ "$XDG_CURRENT_DESKTOP" = "XFCE" ]; then
-        xfce_tweaks
-    else
-        echo "Desktop environment not recognized or not supported"
-    fi
+    case "$XDG_CURRENT_DESKTOP" in
+        GNOME)
+            modify_gnome_session
+            ;;
+        KDE)
+            kde_tweaks
+            ;;
+        XFCE)
+            xfce_tweaks
+            ;;
+        *)
+            # If the desktop environment is not recognized, default to GNOME tweaks
+            echo "Desktop environment not recognized, applying GNOME tweaks by default"
+            modify_gnome_session
+            ;;
+    esac
 }
 
-# Run the main function
+# Execute the main function
 detect_and_apply_tweaks
 
 exit 0

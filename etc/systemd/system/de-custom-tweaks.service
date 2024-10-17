@@ -1,7 +1,8 @@
 [Unit]
 Description=Custom Tweaks for Desktop Environments
+After=manjaro-live.service
 Before=display-manager.service
-After=local-fs.target accounts-daemon.service
+Wants=manjaro-live.service
 
 [Service]
 Type=oneshot
