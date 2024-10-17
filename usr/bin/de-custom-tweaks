@@ -7,36 +7,21 @@ desiredSession="livecdWayland"
 
 # Function to modify GNOME session for the community user
 modify_gnome_session() {
-    local maxAttempts=10
-    local attempt=0
-
-    # Try to modify the file, with a maximum number of attempts
-    while [ $attempt -lt $maxAttempts ]; do
+    # Check if we are in LiveCD mode
+    if [ -e /usr/bin/startbiglive ]; then
+        # Check if the community file exists
         if [ -f "$communityFile" ]; then
-            # Check if XSession is already defined in the file
-            if grep -q "XSession=" "$communityFile"; then
-                # Replace existing XSession value
-                sed -i "s/XSession=.*/XSession=$desiredSession/" "$communityFile"
-                echo "Modified XSession for community user to $desiredSession"
-            else
-                # Add XSession if it doesn't exist
-                echo "XSession=$desiredSession" >> "$communityFile"
-                echo "Added XSession=$desiredSession to community user file"
-            fi
+            # Modify XSession only if the file exists
+            sed -i "s/XSession=.*/XSession=$desiredSession/" "$communityFile"
+            echo "Modified XSession for community user to $desiredSession"
             # Display the content of the file for verification
             cat "$communityFile"
-            return 0
         else
-            # File not found, wait and retry
-            echo "Waiting for $communityFile to be available (attempt $((attempt+1))/$maxAttempts)"
-            sleep 1
-            attempt=$((attempt+1))
+            echo "Community user file not found: $communityFile"
         fi
-    done
-
-    # If the file is not found after all attempts, report an error
-    echo "Error: $communityFile not found after $maxAttempts attempts"
-    return 1
+    else
+        echo "Not in LiveCD mode, skipping modification"
+    fi
 }
 
 # Function for KDE-specific tweaks
