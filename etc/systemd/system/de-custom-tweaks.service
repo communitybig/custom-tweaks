@@ -2,7 +2,7 @@
 Description=Custom Tweaks for Desktop Environments
 After=manjaro-live.service
 Before=display-manager.service
-Wants=manjaro-live.service
+ConditionFileExists=/usr/bin/startbiglive
 
 [Service]
 Type=oneshot
